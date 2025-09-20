@@ -4,6 +4,9 @@ This small X11 overlay draws a click-through crosshair on top of all windows. It
 
 > Note: this project does not fix the underlying driver/hardware issue. It is intended as a lightweight workaround to avoid restarting the X server when the cursor vanishes.
 
+[![x11_crosshair screenshot](https://raw.githubusercontent.com/plops/x11_crosshair/main/screenshot.webp)](https://github.com/plops/x11_crosshair/blob/main/screenshot.webp)
+
+
 ## Features
 - Click-through fullscreen overlay
 - Thin crosshair with a 1px stippled black line for visibility on light backgrounds
@@ -77,3 +80,4 @@ To stop it, kill the process (e.g. `pkill x11_crosshair`).
 ## Notes / Troubleshooting
 - Running under tiling window managers (dwm, i3, etc.) is supported; the overlay is created as override-redirect and is raised each frame. If another client still appears above it, try switching focus away from that client or ensure the compositor isn't re-stacking windows.
 - If the overlay is invisible or behaves oddly on some hardware/compositors, try using a different visual (the code attempts a 32-bit TrueColor visual when available) or disabling compositor effects as a diagnostic step.
+
