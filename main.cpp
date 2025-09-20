@@ -126,7 +126,7 @@ public:
             XRaiseWindow(display, window);
             XFlush(display);
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
     }
 
