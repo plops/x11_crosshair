@@ -1,8 +1,6 @@
 # x11_crosshair
 
-This small X11 overlay draws a click-through crosshair on top of all windows. It was generated as a practical workaround (via an AI) for a recurring issue where the mouse cursor disappeared on an AMD laptop — instead of restarting X11 each time, this tool provides an overlay cursor that remains visible.
-
-> Note: this project does not fix the underlying driver/hardware issue. It is intended as a lightweight workaround to avoid restarting the X server when the cursor vanishes.
+A small X11 overlay that draws a click-through crosshair on top of all windows. It provides a lightweight visible pointer overlay useful in situations where the native cursor is invisible, hard to see, or when you want a persistent crosshair for presentations, demos, accessibility, or debugging.
 
 [![x11_crosshair screenshot](https://raw.githubusercontent.com/plops/x11_crosshair/main/screenshot.webp)](https://github.com/plops/x11_crosshair/blob/main/screenshot.webp)
 
@@ -11,6 +9,12 @@ This small X11 overlay draws a click-through crosshair on top of all windows. It
 - Click-through fullscreen overlay
 - Thin crosshair with a 1px stippled black line for visibility on light backgrounds
 - Attempts to stay on top by raising the override-redirect window each frame
+
+## Common use cases
+- Restore a visible targeting aid if the native cursor is missing or invisible
+- Presentation or screen-capture overlays to highlight pointer location
+- Accessibility assistance for users who need a more visible pointer
+- Debugging remote-desktop or compositor issues where the cursor isn't shown
 
 ## Dependencies
 - X11 development headers (libx11-dev)
@@ -80,4 +84,4 @@ To stop it, kill the process (e.g. `pkill x11_crosshair`).
 ## Notes / Troubleshooting
 - Running under tiling window managers (dwm, i3, etc.) is supported; the overlay is created as override-redirect and is raised each frame. If another client still appears above it, try switching focus away from that client or ensure the compositor isn't re-stacking windows.
 - If the overlay is invisible or behaves oddly on some hardware/compositors, try using a different visual (the code attempts a 32-bit TrueColor visual when available) or disabling compositor effects as a diagnostic step.
-
+- This tool is intended as a simple, user-space overlay. It does not modify drivers or fix low-level input subsystems; use it when a visible pointer overlay is the desired, pragmatic solution.
