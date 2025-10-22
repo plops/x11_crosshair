@@ -93,6 +93,8 @@
 			 :header-only t
 			 ))
 	       (format sh "~%#endif /* !~a */" once-guard))))
+      (format t "write to ~a~%" (list fn-h fn-cpp))
+
       (if format
 	  (only-write-when-hash-changed
 	   fn-h

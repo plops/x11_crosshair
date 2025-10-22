@@ -14,17 +14,31 @@ pkg_check_modules(XFIXES REQUIRED xfixes)
 # Create executable from main.cpp
 add_executable(x11_crosshair main.cpp)
 
+
+
 # Include directories from found packages
 target_include_directories(x11_crosshair PRIVATE
         ${X11_INCLUDE_DIR}
         ${XFIXES_INCLUDE_DIRS}
 )
 
+
 # Link required libraries
 target_link_libraries(x11_crosshair PRIVATE
         ${X11_LIBRARIES}
         ${XFIXES_LIBRARIES}
 )
+
+add_executable(x11_crosshair2 main2.cpp)
+target_include_directories(x11_crosshair2 PRIVATE
+        ${X11_INCLUDE_DIR}
+        ${XFIXES_INCLUDE_DIRS}
+)
+target_link_libraries(x11_crosshair2 PRIVATE
+        ${X11_LIBRARIES}
+        ${XFIXES_LIBRARIES}
+)
+
 
 # Add some useful compiler flags
 target_compile_options(x11_crosshair PRIVATE -Wall -Wextra -Wpedantic)

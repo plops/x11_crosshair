@@ -10,13 +10,8 @@
 
 (in-package #:my-cpp-project)
 
-;; based on
-;; https://blog.devgenius.io/getting-started-with-bazel-for-c-cb3944c673f
-
-
-
 (let ()
-  (defparameter *full-source-dir* #P"./")
+  (defparameter *full-source-dir* #P"/home/kiel/stage/x11_crosshair/")
   (load "util.lisp")
 
   (let* ((class-name `CrosshairOverlay)
