@@ -20,8 +20,46 @@ CrosshairOverlay::CrosshairOverlay() {
     visual = vinfo.visual;
     depth = vinfo.depth;
   }
+  auto attrs{XSetWindowAttributes{
+      .background_pixmap = None,
+      .border_pixel = 0,
+      .override_redirect = True,
+      .colormap = XCreateColormap(display, root, visual, AllocNone)}};
+  auto attr_mask{CWColormap | CWBorderPixel | CWBackPixmap |
+                 CWOverrideRedirect};
+  window = XCreateWindow(display, root, 0, 0, DisplayWidth(display, screen),
+                         DisplayHeight(display, screen), 0, depth, InputOutput,
+                         visual, attr_mask, &attrs);
+  {
+    auto inputRegion{XFixesCreateRegion(display, nullptr, 0)};
+    XFixesSetWindowShapeRegion(display, window, ShapeInput, 0, 0, inputRegion);
+    XFixesDestroyRegion(display, inputRegion);
+  }
+  XMapRaised(display, window);
+  XFlush(display);
+  gc = XCreateGC(display, window, 0, nullptr);
+  XSetForeground(display, gc, WhitePixel(display, screen));
+  black_gc = XCreateGC(display, window, 0, nullptr);
+  XSetForeground(display, black_gc, BlackPixel(display, screen));
+  XSetLineAttributes(display, black_gc, 1, LineOnOffDash, CapButt, JoinMiter);
+  auto dashes{std::array<const char, 2>({1, 1})};
+  XSetDashes(display, black_gc, 0, dashes.data(), dashes.size());
 }
-CrosshairOverlay::~CrosshairOverlay() {}
+CrosshairOverlay::~CrosshairOverlay() {
+  if (!display) {
+    return;
+  }
+  if (gc) {
+    XFreeGC(display, gc);
+  }
+  if (black_gc) {
+    XFreeGC(display, black_gc);
+  }
+  if (window) {
+    XDestroyWindow(display, window);
+  }
+  XCloseDisplay(display);
+}
 Display *CrosshairOverlay::getDisplay() { return display; }
 void CrosshairOverlay::setDisplay(Display *display) { this->display = display; }
 const int &CrosshairOverlay::getScreen() { return screen; }

@@ -38,7 +38,11 @@
      :headers `()
      :header-preamble `(do0 (comments "header")
 			    (include<> X11/Xlib.h
-				       X11/Xutil.h))
+				       X11/Xutil.h
+				       X11/extensions/Xfixes.h
+				       X11/extensions/shape.h
+				       thread
+				       array))
      :implementation-preamble
      `(do0       (comments "implementation"))
      :code `(do0
@@ -99,11 +103,55 @@
 		   (when (XMatchVisualInfo display screen 32 TrueColor &vinfo)
 		     (setf visual vinfo.visual
 			   depth vinfo.depth))
-		   ))
+		   )
+		 (let ((attrs (space XSetWindowAttributes (designated-initializer
+							   :background_pixmap None
+							   :border_pixel 0
+							   :override_redirect True
+							   :colormap (XCreateColormap display root visual AllocNone)
+							   
+							   
+							   
+							   )))
+		       (attr_mask (or CWColormap
+				      CWBorderPixel
+				      CWBackPixmap
+				      CWOverrideRedirect)))
+		   
+		   )
+		 (setf window (XCreateWindow display root 0 0
+					     (DisplayWidth display screen)
+					     (DisplayHeight display screen)
+					     0 depth
+					     InputOutput visual attr_mask &attrs))
+		 (progn
+		  (let ((inputRegion (XFixesCreateRegion display
+							 nullptr 0)))
+		    (XFixesSetWindowShapeRegion display window ShapeInput 0 0 inputRegion)
+		    (XFixesDestroyRegion display inputRegion)))
+		 (XMapRaised display window)
+		 (XFlush display)
+		 (setf gc (XCreateGC display window 0 nullptr))
+		 (XSetForeground display gc (WhitePixel display screen))
+		 (setf black_gc (XCreateGC display window 0 nullptr))
+		 (XSetForeground display black_gc (BlackPixel display screen))
+		 (XSetLineAttributes display black_gc 1 LineOnOffDash CapButt JoinMiter)
+		 (let ((dashes ("std::array<const char,2>" (curly 1 1))))
+		   (XSetDashes display black_gc 0 (dashes.data) (dashes.size)))
+		)
 
 	       (defmethod ,(format nil "~~~a" class-name) ()
 		 (declare
-		  (values :constructor)))
+		  (values :constructor))
+		 (unless display
+		   return)
+		 (when gc
+		   (XFreeGC display gc))
+		 (when black_gc
+		   (XFreeGC display black_gc))
+		 (when window
+		   (XDestroyWindow display window))
+		 (XCloseDisplay display))
 	       
 	       
 	       ,@(remove-if
