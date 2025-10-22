@@ -38,7 +38,7 @@
      :headers `()
      :header-preamble `(do0 (comments "header")
 			    (include<> X11/Xlib.h
-				       ))
+				       X11/Xutil.h))
      :implementation-preamble
      `(do0       (comments "implementation"))
      :code `(do0
@@ -88,7 +88,18 @@
 					  (initform
 					   `(,member-name ,initform)))))))
 					;(explicit)	    
-		  (values :constructor)))
+		  (values :constructor)
+		  )
+		 (setf display (XOpenDisplay nullptr)
+			screen (DefaultScreen display)
+			root (RootWindow display screen))
+		 (let ((*visual (DefaultVisual display screen))
+		       (depth (DefaultDepth display screen))
+		       (vinfo (XVisualInfo)))
+		   (when (XMatchVisualInfo display screen 32 TrueColor &vinfo)
+		     (setf visual vinfo.visual
+			   depth vinfo.depth))
+		   ))
 
 	       (defmethod ,(format nil "~~~a" class-name) ()
 		 (declare

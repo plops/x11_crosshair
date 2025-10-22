@@ -2,7 +2,8 @@
 #define CROSSHAIROVERLAY_H
 
 // header 
-#include <X11/Xlib.h> 
+#include <X11/Xlib.h>
+#include <X11/Xutil.h> 
 class CrosshairOverlay  {
         public:
         void run ()       ;   

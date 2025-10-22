@@ -9,7 +9,18 @@ void CrosshairOverlay::run() {
     auto win_y{0};
   }
 }
-CrosshairOverlay::CrosshairOverlay() {}
+CrosshairOverlay::CrosshairOverlay() {
+  display = XOpenDisplay(nullptr);
+  screen = DefaultScreen(display);
+  root = RootWindow(display, screen);
+  auto *visual{DefaultVisual(display, screen)};
+  auto depth{DefaultDepth(display, screen)};
+  auto vinfo{XVisualInfo()};
+  if (XMatchVisualInfo(display, screen, 32, TrueColor, &vinfo)) {
+    visual = vinfo.visual;
+    depth = vinfo.depth;
+  }
+}
 CrosshairOverlay::~CrosshairOverlay() {}
 Display *CrosshairOverlay::getDisplay() { return display; }
 void CrosshairOverlay::setDisplay(Display *display) { this->display = display; }
