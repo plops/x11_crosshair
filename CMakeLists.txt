@@ -29,7 +29,7 @@ target_link_libraries(x11_crosshair PRIVATE
         ${XFIXES_LIBRARIES}
 )
 
-add_executable(x11_crosshair2 main2.cpp)
+add_executable(x11_crosshair2 main2.cpp CrosshairOverlay.cpp)
 target_include_directories(x11_crosshair2 PRIVATE
         ${X11_INCLUDE_DIR}
         ${XFIXES_INCLUDE_DIRS}

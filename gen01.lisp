@@ -16,7 +16,11 @@
 
   (let* ((class-name `CrosshairOverlay)
 	 (members0 `((:name display :type Display* :initform nullptr)
-		     (:name screen :type int :initform 0)))
+		     (:name screen :type int :initform 0)
+		     (:name root :type Window :initform 0)
+		     (:name window :type Window :initform 0)
+		     (:name gc :type GC :initform nullptr)
+		     (:name black_gc :type GC :initform nullptr)))
 	 (members (loop for e in members0
 			collect
 			(destructuring-bind (&key name type param doc initform) e
@@ -32,12 +36,20 @@
      :dir *full-source-dir*
      :name class-name
      :headers `()
-     :header-preamble `(do0 (comments "header"))
+     :header-preamble `(do0 (comments "header")
+			    (include<> X11/Xlib.h
+				       ))
      :implementation-preamble
      `(do0       (comments "implementation"))
      :code `(do0
 	     (defclass ,class-name ()
 	       "public:"
+	       (defmethod run ()
+		 (while true
+			(let ((root_x 0)
+			      (root_y 0)
+			      (win_x 0)
+			      (win_y 0)))))
 	       (defmethod ,class-name (&key ,@(remove-if
 					       #'null
 					       (loop for e in members
@@ -59,9 +71,9 @@
 					       `(type "std::function<void(const uint8_t*, const size_t)>"
 						      #+nil PacketReceivedCallback ,param-name)
 					       `(type ,(if const-p
-						       (format nil "const ~a&" type)
-						       type)
-						  ,param-name))
+							   (format nil "const ~a&" type)
+							   type)
+						      ,param-name))
 					   )))))
 		  (construct
 		   ,@(remove-if #'null
