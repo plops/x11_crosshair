@@ -49,7 +49,8 @@
 	     (defclass ,class-name ()
 	       "public:"
 	       (defmethod run ()
-		 (let ((thickness 3)))
+		 (let ((thickness 3)
+		       (rects ("std::array<XRectangle,2>" ))))
 		 (while true
 			(let ((root_x 0)
 			      (root_y 0)
@@ -63,40 +64,43 @@
 			    (std--this_thread--sleep_for (std--chrono--milliseconds 50))
 			    continue)
 			  (progn
-			   (let ((rects ("std::array<XRectangle,2>" )))
-			     ,@(loop for e in `((:key x :value 0)
-						(:key y :value (std--max 0 (/ (- root_y
-										 thickness)
-									      2)))
-						(:key width :value (DisplayWidth display screen))
-						(:key height :value thickness))
-				     collect
-				     (destructuring-bind (&key key value) e
-				       `(setf (dot (aref rects 0)
-						  ,key)
-					     ,value)))
+			   ,@(loop for e in `((:key x :value 0)
+					      (:key y :value (std--max 0 (/ (- root_y
+									       thickness)
+									    2)))
+					      (:key width :value (DisplayWidth display screen))
+					      (:key height :value thickness))
+				   collect
+				   (destructuring-bind (&key key value) e
+				     `(setf (dot (aref rects 0)
+						 ,key)
+					    ,value)))
 
-			     ,@(loop for e in `((:key x :value (std--max 0 (/ (- root_x
-										 thickness)
-									      2)))
-						(:key y :value 0)
-						(:key width :value thickness)
-						(:key height :value (DisplayHeight display screen)))
-				     collect
-				     (destructuring-bind (&key key value) e
-				       `(setf (dot (aref rects 1)
-						  ,key)
-					     ,value)))
-			     (progn
-			      (let ((bounding (XFixesCreateRegion display (rects.data) (rects.size))))
-				(XFixesSetWindowShapeRegion display window ShapeBounding 0 0 bounding)
-				(XFixesDestroyRegion display bounding)))
-			     (XClearWindow display window)
-			     (XFillRectangles display window gc (rects.data) (rects.size))
-			    
-			     (XRaiseWindow display window)
-			     (XFlush display)
-			     (std--this_thread--sleep_for (std--chrono--milliseconds 16)))
+			   ,@(loop for e in `((:key x :value (std--max 0 (/ (- root_x
+									       thickness)
+									    2)))
+					      (:key y :value 0)
+					      (:key width :value thickness)
+					      (:key height :value (DisplayHeight display screen)))
+				   collect
+				   (destructuring-bind (&key key value) e
+				     `(setf (dot (aref rects 1)
+						 ,key)
+					    ,value)))
+			   (progn
+			     (let ((bounding (XFixesCreateRegion display (rects.data) (rects.size))))
+			       (XFixesSetWindowShapeRegion display window ShapeBounding 0 0 bounding)
+			       (XFixesDestroyRegion display bounding)))
+			   (XClearWindow display window)
+			   (XFillRectangles display window gc (rects.data) (rects.size))
+			   
+			   
+			   (XDrawLine display window black_gc 0 root_y (- (DisplayWidth display screen) 1) root_y)
+			   (XDrawLine display window black_gc  root_x  0 root_x (- (DisplayHeight display screen) 1))
+			   (XFlush display)
+			   (XRaiseWindow display window)
+			   (XFlush display)
+			   (std--this_thread--sleep_for (std--chrono--milliseconds 16))
 			   ))))
 	       (defmethod ,class-name (&key ,@(remove-if
 					       #'null

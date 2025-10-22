@@ -3,6 +3,7 @@
 #include "CrosshairOverlay.h"
 void CrosshairOverlay::run() {
   auto thickness{3};
+  auto rects{std::array<XRectangle, 2>()};
   while (true) {
     auto root_x{0};
     auto root_y{0};
@@ -17,7 +18,6 @@ void CrosshairOverlay::run() {
       continue;
     }
     {
-      auto rects{std::array<XRectangle, 2>()};
       rects[0].x = 0;
       rects[0].y = std::max(0, (root_y - thickness) / 2);
       rects[0].width = DisplayWidth(display, screen);
@@ -34,6 +34,11 @@ void CrosshairOverlay::run() {
       }
       XClearWindow(display, window);
       XFillRectangles(display, window, gc, rects.data(), rects.size());
+      XDrawLine(display, window, black_gc, 0, root_y,
+                DisplayWidth(display, screen) - 1, root_y);
+      XDrawLine(display, window, black_gc, root_x, 0, root_x,
+                DisplayHeight(display, screen) - 1);
+      XFlush(display);
       XRaiseWindow(display, window);
       XFlush(display);
       std::this_thread::sleep_for(std::chrono::milliseconds(16));
