@@ -29,6 +29,12 @@ target_link_libraries(x11_crosshair PRIVATE
         ${XFIXES_LIBRARIES}
 )
 
+
+
+
+# Add some useful compiler flags
+target_compile_options(x11_crosshair PRIVATE -Wall -Wextra -Wpedantic)
+
 add_executable(x11_crosshair2 main2.cpp CrosshairOverlay.cpp)
 target_include_directories(x11_crosshair2 PRIVATE
         ${X11_INCLUDE_DIR}
@@ -38,10 +44,8 @@ target_link_libraries(x11_crosshair2 PRIVATE
         ${X11_LIBRARIES}
         ${XFIXES_LIBRARIES}
 )
-
-
-# Add some useful compiler flags
-target_compile_options(x11_crosshair PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(x11_crosshair2 PRIVATE -O3 -march=native -mtune=native -fno-exceptions -fno-rtti -flto -pipe -Wall -Wextra -Wpedantic)
+target_link_options(x11_crosshair2 PRIVATE -flto -Wl,-O3 -Wl,--as-needed)
 
 # Aggressive GCC-only optimizations for Release builds
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
