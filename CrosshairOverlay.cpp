@@ -2,11 +2,42 @@
 // implementation
 #include "CrosshairOverlay.h"
 void CrosshairOverlay::run() {
+  auto thickness{3};
   while (true) {
     auto root_x{0};
     auto root_y{0};
     auto win_x{0};
     auto win_y{0};
+    auto mask{0u};
+    auto child_return{Window()};
+    auto root_return{Window()};
+    if (!XQueryPointer(display, root, &root_return, &child_return, &root_x,
+                       &root_y, &win_x, &win_y, &mask)) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      continue;
+    }
+    {
+      auto rects{std::array<XRectangle, 2>()};
+      rects[0].x = 0;
+      rects[0].y = std::max(0, (root_y - thickness) / 2);
+      rects[0].width = DisplayWidth(display, screen);
+      rects[0].height = thickness;
+      rects[1].x = std::max(0, (root_x - thickness) / 2);
+      rects[1].y = 0;
+      rects[1].width = thickness;
+      rects[1].height = DisplayHeight(display, screen);
+      {
+        auto bounding{XFixesCreateRegion(display, rects.data(), rects.size())};
+        XFixesSetWindowShapeRegion(display, window, ShapeBounding, 0, 0,
+                                   bounding);
+        XFixesDestroyRegion(display, bounding);
+      }
+      XClearWindow(display, window);
+      XFillRectangles(display, window, gc, rects.data(), rects.size());
+      XRaiseWindow(display, window);
+      XFlush(display);
+      std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
   }
 }
 CrosshairOverlay::CrosshairOverlay() {

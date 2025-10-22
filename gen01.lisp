@@ -49,11 +49,55 @@
 	     (defclass ,class-name ()
 	       "public:"
 	       (defmethod run ()
+		 (let ((thickness 3)))
 		 (while true
 			(let ((root_x 0)
 			      (root_y 0)
 			      (win_x 0)
-			      (win_y 0)))))
+			      (win_y 0)
+			      (mask "0u")
+			      (child_return (Window))
+			      (root_return (Window)))
+			  (unless (XQueryPointer display root &root_return &child_return
+						 &root_x &root_y &win_x &win_y &mask)
+			    (std--this_thread--sleep_for (std--chrono--milliseconds 50))
+			    continue)
+			  (progn
+			   (let ((rects ("std::array<XRectangle,2>" )))
+			     ,@(loop for e in `((:key x :value 0)
+						(:key y :value (std--max 0 (/ (- root_y
+										 thickness)
+									      2)))
+						(:key width :value (DisplayWidth display screen))
+						(:key height :value thickness))
+				     collect
+				     (destructuring-bind (&key key value) e
+				       `(setf (dot (aref rects 0)
+						  ,key)
+					     ,value)))
+
+			     ,@(loop for e in `((:key x :value (std--max 0 (/ (- root_x
+										 thickness)
+									      2)))
+						(:key y :value 0)
+						(:key width :value thickness)
+						(:key height :value (DisplayHeight display screen)))
+				     collect
+				     (destructuring-bind (&key key value) e
+				       `(setf (dot (aref rects 1)
+						  ,key)
+					     ,value)))
+			     (progn
+			      (let ((bounding (XFixesCreateRegion display (rects.data) (rects.size))))
+				(XFixesSetWindowShapeRegion display window ShapeBounding 0 0 bounding)
+				(XFixesDestroyRegion display bounding)))
+			     (XClearWindow display window)
+			     (XFillRectangles display window gc (rects.data) (rects.size))
+			    
+			     (XRaiseWindow display window)
+			     (XFlush display)
+			     (std--this_thread--sleep_for (std--chrono--milliseconds 16)))
+			   ))))
 	       (defmethod ,class-name (&key ,@(remove-if
 					       #'null
 					       (loop for e in members
@@ -92,8 +136,7 @@
 					  (initform
 					   `(,member-name ,initform)))))))
 					;(explicit)	    
-		  (values :constructor)
-		  )
+		  (values :constructor))
 		 (setf display (XOpenDisplay nullptr)
 			screen (DefaultScreen display)
 			root (RootWindow display screen))
@@ -102,23 +145,17 @@
 		       (vinfo (XVisualInfo)))
 		   (when (XMatchVisualInfo display screen 32 TrueColor &vinfo)
 		     (setf visual vinfo.visual
-			   depth vinfo.depth))
-		   )
+			   depth vinfo.depth)))
 		 (let ((attrs (space XSetWindowAttributes (designated-initializer
 							   :background_pixmap None
 							   :border_pixel 0
 							   :override_redirect True
 							   :colormap (XCreateColormap display root visual AllocNone)
-							   
-							   
-							   
 							   )))
 		       (attr_mask (or CWColormap
 				      CWBorderPixel
 				      CWBackPixmap
-				      CWOverrideRedirect)))
-		   
-		   )
+				      CWOverrideRedirect))))
 		 (setf window (XCreateWindow display root 0 0
 					     (DisplayWidth display screen)
 					     (DisplayHeight display screen)
@@ -137,8 +174,7 @@
 		 (XSetForeground display black_gc (BlackPixel display screen))
 		 (XSetLineAttributes display black_gc 1 LineOnOffDash CapButt JoinMiter)
 		 (let ((dashes ("std::array<const char,2>" (curly 1 1))))
-		   (XSetDashes display black_gc 0 (dashes.data) (dashes.size)))
-		)
+		   (XSetDashes display black_gc 0 (dashes.data) (dashes.size))))
 
 	       (defmethod ,(format nil "~~~a" class-name) ()
 		 (declare
