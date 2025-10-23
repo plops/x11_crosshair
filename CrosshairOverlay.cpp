@@ -20,10 +20,10 @@ void CrosshairOverlay::run() {
       last_y = root_y;
       {
         rects[0].x = 0;
-        rects[0].y = std::max(0, (root_y - thickness) / 2);
+        rects[0].y = std::max(0, root_y - (thickness / 2));
         rects[0].width = DisplayWidth(display, screen);
         rects[0].height = thickness;
-        rects[1].x = std::max(0, (root_x - thickness) / 2);
+        rects[1].x = std::max(0, root_x - (thickness / 2));
         rects[1].y = 0;
         rects[1].width = thickness;
         rects[1].height = DisplayHeight(display, screen);

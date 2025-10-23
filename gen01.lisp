@@ -71,9 +71,9 @@
 			  
 			  (progn
 			    ,@(loop for e in `((:key x :value 0)
-					       (:key y :value (std--max 0 (/ (- root_y
-										thickness)
-									     2)))
+					       (:key y :value (std--max 0 (- root_y
+									     (/ thickness 2))
+									))
 					       (:key width :value (DisplayWidth display screen))
 					       (:key height :value thickness))
 				    collect
@@ -82,9 +82,9 @@
 						  ,key)
 					     ,value)))
 
-			    ,@(loop for e in `((:key x :value (std--max 0 (/ (- root_x
-										thickness)
-									     2)))
+			    ,@(loop for e in `((:key x :value (std--max 0 (- root_x
+									     (/ thickness 2))
+									))
 					       (:key y :value 0)
 					       (:key width :value thickness)
 					       (:key height :value (DisplayHeight display screen)))
