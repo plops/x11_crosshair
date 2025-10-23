@@ -56,7 +56,7 @@
 		       (last_x -1)
 		       (last_y -1)))
 		 (while true
-			(XNextEvent display &event)
+			(XNextEvent display &event) ;; updates are slow when many events accumulate
 			(when (== MotionNotify
 				  event.type)
 			  (letc ((root_x event.xmotion.x_root)
