@@ -44,64 +44,71 @@
 				       thread
 				       array))
      :implementation-preamble
-     `(do0       (comments "implementation"))
+     `(do0       (comments "implementation")
+		 (include<> algorithm))
      :code `(do0
 	     (defclass ,class-name ()
 	       "public:"
 	       (defmethod run ()
 		 (let ((thickness 3)
-		       (rects ("std::array<XRectangle,2>" ))))
+		       (rects ("std::array<XRectangle,2>" ))
+		       (event (XEvent))
+		       (last_x -1)
+		       (last_y -1)))
 		 (while true
-			(let ((root_x 0)
-			      (root_y 0)
-			      (win_x 0)
-			      (win_y 0)
-			      (mask "0u")
-			      (child_return (Window))
-			      (root_return (Window)))
-			  (unless (XQueryPointer display root &root_return &child_return
-						 &root_x &root_y &win_x &win_y &mask)
-			    (std--this_thread--sleep_for (std--chrono--milliseconds 50))
+			(XNextEvent display &event)
+			(when (== MotionNotify
+				  event.type)
+			  (letc ((root_x event.xmotion.x_root)
+				 (root_y event.xmotion.y_root)
+				 ))
+			  (when (logand (== last_x root_x)
+				     (== last_y root_y))
 			    continue)
+			  (setf last_x root_x
+				last_y root_y)
+			  (do0
+			  
 			  (progn
-			   ,@(loop for e in `((:key x :value 0)
-					      (:key y :value (std--max 0 (/ (- root_y
-									       thickness)
-									    2)))
-					      (:key width :value (DisplayWidth display screen))
-					      (:key height :value thickness))
-				   collect
-				   (destructuring-bind (&key key value) e
-				     `(setf (dot (aref rects 0)
-						 ,key)
-					    ,value)))
+			    ,@(loop for e in `((:key x :value 0)
+					       (:key y :value (std--max 0 (/ (- root_y
+										thickness)
+									     2)))
+					       (:key width :value (DisplayWidth display screen))
+					       (:key height :value thickness))
+				    collect
+				    (destructuring-bind (&key key value) e
+				      `(setf (dot (aref rects 0)
+						  ,key)
+					     ,value)))
 
-			   ,@(loop for e in `((:key x :value (std--max 0 (/ (- root_x
-									       thickness)
-									    2)))
-					      (:key y :value 0)
-					      (:key width :value thickness)
-					      (:key height :value (DisplayHeight display screen)))
-				   collect
-				   (destructuring-bind (&key key value) e
-				     `(setf (dot (aref rects 1)
-						 ,key)
-					    ,value)))
-			   (progn
-			     (let ((bounding (XFixesCreateRegion display (rects.data) (rects.size))))
-			       (XFixesSetWindowShapeRegion display window ShapeBounding 0 0 bounding)
-			       (XFixesDestroyRegion display bounding)))
-			   (XClearWindow display window)
-			   (XFillRectangles display window gc (rects.data) (rects.size))
+			    ,@(loop for e in `((:key x :value (std--max 0 (/ (- root_x
+										thickness)
+									     2)))
+					       (:key y :value 0)
+					       (:key width :value thickness)
+					       (:key height :value (DisplayHeight display screen)))
+				    collect
+				    (destructuring-bind (&key key value) e
+				      `(setf (dot (aref rects 1)
+						  ,key)
+					     ,value)))
+			    (progn
+			      (let ((bounding (XFixesCreateRegion display (rects.data) (rects.size))))
+				(XFixesSetWindowShapeRegion display window ShapeBounding 0 0 bounding)
+				(XFixesDestroyRegion display bounding)))
+			    (XClearWindow display window)
+			    (XFillRectangles display window gc (rects.data) (rects.size))
 			   
 			   
-			   (XDrawLine display window black_gc 0 root_y (- (DisplayWidth display screen) 1) root_y)
-			   (XDrawLine display window black_gc  root_x  0 root_x (- (DisplayHeight display screen) 1))
-			   (XFlush display)
-			   (XRaiseWindow display window)
-			   (XFlush display)
-			   (std--this_thread--sleep_for (std--chrono--milliseconds 16))
-			   ))))
+			    (XDrawLine display window black_gc 0 root_y (- (DisplayWidth display screen) 1) root_y)
+			    (XDrawLine display window black_gc  root_x  0 root_x (- (DisplayHeight display screen) 1))
+					;(XFlush display)
+			    (XRaiseWindow display window)
+			    (XFlush display)
+			    (std--this_thread--sleep_for (std--chrono--milliseconds 16))
+			    )))
+			))
 	       (defmethod ,class-name (&key ,@(remove-if
 					       #'null
 					       (loop for e in members
@@ -170,6 +177,8 @@
 							 nullptr 0)))
 		    (XFixesSetWindowShapeRegion display window ShapeInput 0 0 inputRegion)
 		    (XFixesDestroyRegion display inputRegion)))
+
+		 (XSelectInput display root PointerMotionMask)
 		 (XMapRaised display window)
 		 (XFlush display)
 		 (setf gc (XCreateGC display window 0 nullptr))
