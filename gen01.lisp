@@ -178,7 +178,7 @@
 		    (XFixesSetWindowShapeRegion display window ShapeInput 0 0 inputRegion)
 		    (XFixesDestroyRegion display inputRegion)))
 
-		 (XSelectInput display root PointerMotionMask)
+		 (XSelectInput display root PointerMotionMask) ;; i only get motion when mouse cursor is above root window
 		 (XMapRaised display window)
 		 (XFlush display)
 		 (setf gc (XCreateGC display window 0 nullptr))
